@@ -2,7 +2,6 @@ package org.pltw.examples.poptartinventory;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,11 +22,7 @@ public class DeleteAdapter extends ArrayAdapter<PopTart> {
     public DeleteAdapter(Context context, int textViewResourceId, ArrayList<PopTart> tarts){
         super(context, textViewResourceId, tarts);
         popTartList = tarts;
-
-
-
-
-    }
+        }
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
@@ -41,9 +36,6 @@ public class DeleteAdapter extends ArrayAdapter<PopTart> {
         nameView.setText(popTartList.get(position).getName());
         buttonOne.setText("Delete");
 
-
-
-
         buttonOne.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,20 +43,13 @@ public class DeleteAdapter extends ArrayAdapter<PopTart> {
                     popTartList.get(position).setDelete(false);
                     buttonOne2 = (Button) v.findViewById(R.id.delete_check);
                     buttonOne2.setBackgroundResource(android.R.drawable.btn_default);
-                    Log.d("MyTag", "onClick: if"+popTartList.get(position).getDelete().toString());
-
-
-
                 } else {
                     popTartList.get(position).setDelete(true);
                     buttonOne2 = (Button) v.findViewById(R.id.delete_check);
                     buttonOne2.setBackgroundColor(Color.RED);
-                    Log.d("MyTag", popTartList.get(position).toString() + " onClick: else "+popTartList.get(position).getDelete().toString());
                 }
-
-
-            }
-        });
+               }
+          });
     return v;
     }
 }

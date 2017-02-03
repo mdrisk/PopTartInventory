@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -21,16 +20,16 @@ import java.util.ArrayList;
  * Created by mrisk on 1/31/2017.
  */
 public class DeleteActivity extends AppCompatActivity {
-    ArrayList<PopTart> inventory = new ArrayList<>();
+
     ArrayList<PopTart> inventory2 = new ArrayList<>();
-
     String saveStuff;
-
     ListView simplelist;
     Button returnButton;
     Button deleteButton;
     Button deleteAll;
 
+
+    // Beta 0.98 Current persistence
     File target = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
     File logFile = new File(target.getAbsolutePath() + "/", "PopTart.txt");
 
@@ -41,15 +40,7 @@ public class DeleteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         load();
-
         setContentView(R.layout.activity_delete);
-
-        System.out.println(logFile);
-
-
-
-        //Log.d("MyTag", inventory2.get(0).getName());
-
 
         returnButton = (Button) findViewById(R.id.return_to_main);
         deleteButton = (Button) findViewById(R.id.delete);
@@ -67,7 +58,6 @@ public class DeleteActivity extends AppCompatActivity {
         });
 
 
-
         returnButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,7 +70,7 @@ public class DeleteActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 saveStuff = "";
-                //int temp = inventory2.size();
+
                 for(int i = 0; i<inventory2.size(); i++){
                     if(inventory2.get(i).getDelete()){
                         inventory2.get(i).setName("null");
@@ -92,7 +82,7 @@ public class DeleteActivity extends AppCompatActivity {
                     if (inventory2.get(i).getName().equals("null")) {
                     } else {
                         saveStuff += inventory2.get(i).getName() + "/" + String.valueOf(inventory2.get(i).getCount()) + "/" + String.valueOf(inventory2.get(i).getMinimum()) + "/" ;
-                        Log.d("MyTag", saveStuff);
+
                     }
                 }
                 writeFile(saveStuff);
@@ -105,17 +95,16 @@ public class DeleteActivity extends AppCompatActivity {
 
         DeleteAdapter deleteAdapter = new DeleteAdapter(this, R.layout.list_view_delete, inventory2);
         simplelist.setAdapter(deleteAdapter);
-
-
-
     }
 
+    // Force a refresh
     public void refresh(){
         DeleteAdapter deleteAdapter = new DeleteAdapter(this, R.layout.list_view_delete, inventory2);
         simplelist.setAdapter(deleteAdapter);
     }
-    public void load() {
 
+    // Beta 0.98 Current persistence
+    public void load() {
         int i = 0;
         inventory2.clear();
 
@@ -144,12 +133,11 @@ public class DeleteActivity extends AppCompatActivity {
                     }
                 }
             }
-
         } catch (Exception e) {
-
         }
-
     }
+
+    // Beta 0.98 Current persistence
     public void writeFile(String text) {
 
 
@@ -173,7 +161,5 @@ public class DeleteActivity extends AppCompatActivity {
             System.out.println(text);
             System.out.println("Failed to write");
         }
-
     }
-
 }
