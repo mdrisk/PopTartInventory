@@ -15,9 +15,9 @@ import java.util.ArrayList;
  * Created by mrisk on 1/31/2017.
  */
 public class DeleteAdapter extends ArrayAdapter<PopTart> {
-    ArrayList<PopTart> popTartList = new ArrayList<>();
-    Button buttonOne;
-    Button buttonOne2;
+    private ArrayList<PopTart> popTartList = new ArrayList<>();
+    private Button buttonOne;
+    private Button buttonOne2;
 
     public DeleteAdapter(Context context, int textViewResourceId, ArrayList<PopTart> tarts){
         super(context, textViewResourceId, tarts);

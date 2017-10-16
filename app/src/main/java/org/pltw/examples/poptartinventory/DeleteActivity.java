@@ -21,12 +21,12 @@ import java.util.ArrayList;
  */
 public class DeleteActivity extends AppCompatActivity {
 
-    ArrayList<PopTart> inventory2 = new ArrayList<>();
-    String saveStuff;
-    ListView simplelist;
-    Button returnButton;
-    Button deleteButton;
-    Button deleteAll;
+    private ArrayList<PopTart> inventory2 = new ArrayList<>();
+    private String saveStuff;
+    private ListView simplelist;
+    private Button returnButton;
+    private Button deleteButton;
+    private Button deleteAll;
 
 
     // Beta 0.98 Current persistence
