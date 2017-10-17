@@ -1,10 +1,13 @@
 package org.pltw.examples.poptartinventory;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -12,10 +15,17 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /*
@@ -38,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     //Beta 0.98 - Current Persistence model as txt doc.
-    private File target = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-    private File saveFile = new File(target.getAbsolutePath() + "/", "PopTart.txt");
+    private String filename = "popTart.txt";
+
 
 
     @Override
@@ -48,10 +58,23 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
+
         simplelist = (ListView) findViewById(R.id.simpleListView);
 
-        //Load from list from txt file
-        loadFromFile();
+        //Creates the file if it doesn't exist
+        File file = getBaseContext().getFileStreamPath(filename);
+
+        if(file.exists())
+        {
+            Log.i("Success", "File found");
+
+        } else {
+            Log.i("Error", "File not found");
+
+        }
+
+
+        loadFromFile(filename, getApplicationContext());
 
         //Handling Intent return from Addition Activity
         Intent in = this.getIntent();
@@ -70,10 +93,13 @@ public class MainActivity extends AppCompatActivity {
                     newFlavor = "match";
                     Toast.makeText(MainActivity.this,
                             "Duplication Error: Flavor already exists", Toast.LENGTH_SHORT).show();
+                } else {
+
                 }
+                //Here we are adding the poptart to the ArrayList if it didn't match an exisiting poptart
+
             }
-            //Here we are adding the poptart to the ArrayList if it didn't match an exisiting poptart
-            if (!newFlavor.equalsIgnoreCase("match")) {
+            if(!newFlavor.equalsIgnoreCase("match")) {
                 inventory.add(new PopTart(newFlavor, current, min));
             }
 
@@ -89,10 +115,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
             //This writes the txt file via the writeToFile()
-            writeToFile(saveData);
+            writeToFile(saveData, getApplicationContext());
 
             //We wrote the file and now reload it to verify persistence
-            loadFromFile();
+
+
+            loadFromFile(filename, getApplicationContext());
         }
 
         //Setting up the adapter for the listview
@@ -138,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     //Generate Email Body
     public String generateList(ArrayList<PopTart> tarts) {
         String emailString = "Pop-Tarts needed: \n";
@@ -175,48 +202,41 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Beta 0.98 Current persistence
-    public void writeToFile(String text) {
 
-        //Creates a saveFile if it doesn't exist
-        if (!saveFile.exists()) {
+    // Beta 1.01 Current persistence
+    public void writeToFile(String text, Context ctx) {
+        FileOutputStream outputStream;
+
+
             try {
-                saveFile.createNewFile();
-            } catch (IOException e) {
+                outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream.write(text.getBytes());
+                outputStream.close();
+                Log.i("save", "Saved Data");
+            } catch (Exception e) {
                 e.printStackTrace();
-                //Used for testing purposes
-                //System.out.println("Catch A - writing");
+                Log.i("save", "Didn't save!");
             }
         }
-        try {
 
-            BufferedWriter buf = new BufferedWriter(new FileWriter(saveFile, false));
-            buf.write(text);
-            buf.close();
-
-            //Used for testing purposes
-            //System.out.println(text);
-            //System.out.println("File written");
-        } catch (IOException e) {
-            e.printStackTrace();
-            //Used for testing purposes
-            //System.out.println(text);
-            //System.out.println("Failed to write");
-        }
-    }
-
-    // Beta 0.98 Current persistence
-    public void loadFromFile() {
+    // Beta 1.01 Current persistence
+    public void loadFromFile(String filename, Context ctx) {
 
         //Clear the ArrayList
         inventory.clear();
         int i = 0;
         try {
-            FileReader fr = new FileReader(saveFile);
-            BufferedReader in = new BufferedReader(fr);
+            FileInputStream fis = ctx.openFileInput(filename);
+            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+
+            //StringBuilder sb = new StringBuilder();
+            //String line;
+
+
+            BufferedReader in = new BufferedReader(isr);
             String str;
             if ((str = in.readLine()) != null) {
-                System.out.println(str);
+                //System.out.println(str);
 
                 //Reading and assigning data based on delimiting character "/"
                 while (str.indexOf("/") >= 0) {
@@ -238,10 +258,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+            isr.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
+
+
 
 }
 

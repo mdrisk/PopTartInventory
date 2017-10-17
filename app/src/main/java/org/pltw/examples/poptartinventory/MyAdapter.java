@@ -19,11 +19,9 @@ import java.util.ArrayList;
  */
 public class MyAdapter extends ArrayAdapter<PopTart> {
 
-    private ArrayList<PopTart> popTartList = new ArrayList<>();
-    private Button updateButton;
-    private TextView countView;
-    private EditText countUpdate;
-    private String format;
+    ArrayList<PopTart> popTartList = new ArrayList<>();
+    Button updateButton;
+    String format;
 
     public MyAdapter(Context context, int textViewResourceId, ArrayList<PopTart> tarts) {
         super(context, textViewResourceId, tarts);
@@ -36,12 +34,18 @@ public class MyAdapter extends ArrayAdapter<PopTart> {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         v = inflater.inflate(R.layout.list_view_inventory, null);
 
+        final TextView countView;
+        final EditText countUpdate;
+        final TextView nameView;
+
         //XML wire-up
-        TextView nameView = (TextView) v.findViewById(R.id.name);
+        nameView = (TextView) v.findViewById(R.id.name);
         countView = (TextView) v.findViewById(R.id.countnumber);
         countUpdate = (EditText) v.findViewById(R.id.edit_text);
+        updateButton = (Button) v.findViewById(R.id.increment);
 
         nameView.setText(popTartList.get(position).getName());
+
         // Formatting the "5/10" view
         format = String.valueOf(popTartList.get(position).getCount()) + " / " + String.valueOf(popTartList.get(position).getMinimum());
         countView.setText(format);
@@ -53,10 +57,10 @@ public class MyAdapter extends ArrayAdapter<PopTart> {
             countView.setTextColor(Color.DKGRAY);
         }
 
-        updateButton = (Button) v.findViewById(R.id.increment);
+
         updateButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                if (countUpdate.getText().toString().trim().length() == 0) {
+                if (countUpdate.getText().toString().trim().equalsIgnoreCase("")) {
                     countUpdate.clearFocus();
                     hideKeyboardFrom(getContext(), v);
                 } else {
@@ -85,8 +89,8 @@ public class MyAdapter extends ArrayAdapter<PopTart> {
                         countView.setTextColor(Color.DKGRAY);
                     }
                     //Save and reload
-                    new MainActivity().writeToFile(saveData);
-                    new MainActivity().loadFromFile();
+                    new MainActivity().writeToFile(saveData, getContext());
+                    new MainActivity().loadFromFile("popTart.txt", getContext());
                 }
             }
         });

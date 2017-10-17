@@ -1,19 +1,20 @@
 package org.pltw.examples.poptartinventory;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 /**
@@ -21,17 +22,16 @@ import java.util.ArrayList;
  */
 public class DeleteActivity extends AppCompatActivity {
 
-    private ArrayList<PopTart> inventory2 = new ArrayList<>();
-    private String saveStuff;
+    private ArrayList<PopTart> inventory = new ArrayList<>();
+    private String saveData;
     private ListView simplelist;
     private Button returnButton;
     private Button deleteButton;
     private Button deleteAll;
 
+    private String filename = "popTart.txt";
 
-    // Beta 0.98 Current persistence
-    File target = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-    File logFile = new File(target.getAbsolutePath() + "/", "PopTart.txt");
+
 
 
 
@@ -39,7 +39,7 @@ public class DeleteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        load();
+        loadFromFile(filename, getApplicationContext());
         setContentView(R.layout.activity_delete);
 
         returnButton = (Button) findViewById(R.id.return_to_main);
@@ -50,10 +50,10 @@ public class DeleteActivity extends AppCompatActivity {
         deleteAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveStuff = "";
-                writeFile(saveStuff);
-                load();
-
+                saveData = "";
+                writeToFile(saveData, getApplicationContext());
+                loadFromFile(filename, getApplicationContext());
+                refresh();
             }
         });
 
@@ -69,97 +69,101 @@ public class DeleteActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveStuff = "";
+                saveData = "";
 
-                for(int i = 0; i<inventory2.size(); i++){
-                    if(inventory2.get(i).getDelete()){
-                        inventory2.get(i).setName("null");
+                for(int i = 0; i< inventory.size(); i++){
+                    if(inventory.get(i).getDelete()){
+                        inventory.get(i).setName("null");
 
                     }
                 }
-                for (int i = 0; i < inventory2.size(); i++) {
+                for (int i = 0; i < inventory.size(); i++) {
 
-                    if (inventory2.get(i).getName().equals("null")) {
+                    if (inventory.get(i).getName().equals("null")) {
                     } else {
-                        saveStuff += inventory2.get(i).getName() + "/" + String.valueOf(inventory2.get(i).getCount()) + "/" + String.valueOf(inventory2.get(i).getMinimum()) + "/" ;
+                        saveData += inventory.get(i).getName() + "/" + String.valueOf(inventory.get(i).getCount()) + "/" + String.valueOf(inventory.get(i).getMinimum()) + "/" ;
 
                     }
                 }
-                writeFile(saveStuff);
-                load();
+                writeToFile(saveData,getApplicationContext() );
+                loadFromFile(filename, getApplicationContext());
 
                 refresh();
 
             }
         });
 
-        DeleteAdapter deleteAdapter = new DeleteAdapter(this, R.layout.list_view_delete, inventory2);
+        DeleteAdapter deleteAdapter = new DeleteAdapter(this, R.layout.list_view_delete, inventory);
         simplelist.setAdapter(deleteAdapter);
     }
 
     // Force a refresh
     public void refresh(){
-        DeleteAdapter deleteAdapter = new DeleteAdapter(this, R.layout.list_view_delete, inventory2);
+        DeleteAdapter deleteAdapter = new DeleteAdapter(this, R.layout.list_view_delete, inventory);
         simplelist.setAdapter(deleteAdapter);
     }
 
-    // Beta 0.98 Current persistence
-    public void load() {
-        int i = 0;
-        inventory2.clear();
+
+    // Beta 1.01 Current persistence
+    public void writeToFile(String text, Context ctx) {
+        FileOutputStream outputStream;
+
 
         try {
-            FileReader fr = new FileReader(logFile);
-            BufferedReader in = new BufferedReader(fr);
+            outputStream = ctx.openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(text.getBytes());
+            outputStream.close();
+            Log.i("save", "Saved Data");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("save", "Didn't save!");
+        }
+    }
+
+    // Beta 1.01 Current persistence
+    public void loadFromFile(String filename, Context ctx) {
+
+        //Clear the ArrayList
+        inventory.clear();
+        int i = 0;
+        try {
+            FileInputStream fis = ctx.openFileInput(filename);
+            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+
+            //StringBuilder sb = new StringBuilder();
+            //String line;
+
+
+            BufferedReader in = new BufferedReader(isr);
             String str;
             if ((str = in.readLine()) != null) {
-                System.out.println(str);
+                //System.out.println(str);
 
+                //Reading and assigning data based on delimiting character "/"
                 while (str.indexOf("/") >= 0) {
                     String name = str.substring(0, str.indexOf("/"));
-                    System.out.println(name);
+                    //System.out.println(name);
                     str = str.substring(str.indexOf("/") + 1);
                     int count = Integer.valueOf(str.substring(0, str.indexOf("/")));
-                    System.out.println(String.valueOf(count));
+                    //System.out.println(String.valueOf(count));
                     str = str.substring(str.indexOf("/") + 1);
                     int min = Integer.valueOf(str.substring(0, str.indexOf("/")));
-                    System.out.println(String.valueOf(min));
+                    //System.out.println(String.valueOf(min));
                     str = str.substring(str.indexOf("/") + 1);
 
                     if (name.equals("null")) {
                     } else {
-                        inventory2.add(new PopTart(name, count, min));
-
+                        //Adding poptarts back into ArrayList
+                        inventory.add(new PopTart(name, count, min));
+                        //System.out.println(inventory.size());
                     }
                 }
             }
+            isr.close();
         } catch (Exception e) {
-        }
-    }
-
-    // Beta 0.98 Current persistence
-    public void writeFile(String text) {
-
-
-        if (!logFile.exists()) {
-            try {
-                logFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("Catch A - writing");
-            }
-        }
-        try {
-
-            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, false));
-            buf.write(text);
-            buf.close();
-            System.out.println(text);
-            System.out.println("File written");
-        } catch (IOException e) {
             e.printStackTrace();
-            System.out.println(text);
-            System.out.println("Failed to write");
         }
+
     }
+
 }
